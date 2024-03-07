@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9]
-        os: [ubuntu-18.04, macOS-latest, windows-latest]
+        os: [ubuntu-22.04, macOS-latest, windows-latest]
         include:
           # pypy3 on Mac OS currently fails trying to compile
           # brotlipy. Moving pypy3 to only test linux.
@@ -20,12 +20,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: MatteoH2O1999/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
         make
+    - name: fix ssl errors
+      if: ${{ matrix.os == 'ubuntu-22.04' }}
+      run: |
+        curl -L https://raw.githubusercontent.com/kevin1024/pytest-httpbin/0bd7637a5c59b1a8376b9a4f051b02a97abb8c1b/pytest_httpbin/certs/cacert.pem --output /opt/hostedtoolcache/Python/3.5.10/x64/lib/python3.5/site-packages/pytest_httpbin/certs/cacert.pem
     - name: Run tests
       run: |
         make ci
